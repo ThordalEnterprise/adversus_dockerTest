@@ -19,7 +19,7 @@ pipelines:
             - export APP_COMMIT=${BITBUCKET_COMMIT}
             - export APP_BRANCH=${BITBUCKET_BRANCH}
             - echo "Building Docker image..."
-            - docker login -u thordalenterprise -p PWD123456
+            - docker login -u username -p password
             - docker build -t thordalenterprise/infrastructure-challenge-adversus:${BITBUCKET_COMMIT} .
             - echo "Pushing Docker image to DockerHub..."
             - docker push thordalenterprise/infrastructure-challenge-adversus:${BITBUCKET_COMMIT}
