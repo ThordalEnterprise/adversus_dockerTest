@@ -1,0 +1,159 @@
+# bitbucket-pipelines.yml
+image: node:14
+
+pipelines:
+  branches:
+    '*':
+      - step:
+          name: Lint Code
+          script:
+            - pip install pycodestyle
+            - pycodestyle .
+
+  default:
+    - step:
+        name: Build and Release
+        script:
+          - echo "Installing Docker..."
+          - apt-get update
+          - apt-get install -y docker.io
+
+          - echo "Building the Docker image..."
+          - docker build -t thordalenterprise/infrastructure-challenge-adversus:${BITBUCKET_COMMIT:-latest} --build-arg APP_BRANCH=${BITBUCKET_BRANCH:-unknown} --build-arg APP_COMMIT=${BITBUCKET_COMMIT:-unknown} .
+
+          # Tag the image with the commit hash
+          - docker tag thordalenterprise/infrastructure-challenge-adversus:${BITBUCKET_COMMIT:-latest} thordalenterprise/infrastructure-challenge-adversus:${BITBUCKET_COMMIT:-latest}
+
+          # Docker login and push
+          - docker login -u thordalenterprise -p PWD123456
+          - docker push thordalenterprise/infrastructure-challenge-adversus:${BITBUCKET_COMMIT:-latest}
+
+# Define the release step
+definitions:
+  steps:
+    - step: &release-step
+        name: Release to DockerHub
+        deployment: production
+        script:
+          - echo "Installing Docker..."
+          - apt-get update
+          - apt-get install -y docker.io
+
+          - docker login -u thordalenterprise -p PWD123456
+          - docker push thordalenterprise/infrastructure-challenge-adversus:${BITBUCKET_COMMIT:-latest}
+          - docker push thordalenterprise/infrastructure-challenge-adversus:${BITBUCKET_COMMIT:-latest}
+          - docker push thordalenterprise/infrastructure-challenge-adversus:${BITBUCKET_COMMIT:-latest}
+
+# Add the release step to the default pipeline
+pipelines:
+  default:
+    - step:
+        <<: *release-step
+
+
+
+
+
+
+
+____________________
+
+
+
+
+# bitbucket-pipelines.yml
+image: node:14
+
+pipelines:
+  branches:
+    '*':
+      - step:
+          name: Lint Code
+          script:
+            - pip install pycodestyle
+            - pycodestyle .
+
+  default:
+    - step:
+        name: Build and Release
+        script:
+          - echo "Installing Docker..."
+          - apt-get update
+          - apt-get install -y docker.io
+
+          # Build the Docker image using Kaniko
+          - echo "Building the Docker image with Kaniko..."
+          - wget -O /kaniko https://github.com/GoogleContainerTools/kaniko/releases/download/v1.7.0/kaniko-linux-amd64
+          - chmod +x /kaniko
+          - /kaniko --context . --dockerfile Dockerfile --destination thordalenterprise/infrastructure-challenge-adversus:${BITBUCKET_COMMIT:-latest}
+
+          # Tag the image with the commit hash
+          - docker tag thordalenterprise/infrastructure-challenge-adversus:${BITBUCKET_COMMIT:-latest} thordalenterprise/infrastructure-challenge-adversus:${BITBUCKET_COMMIT:-latest}
+
+          # Docker login and push
+          - docker login -u thordalenterprise -p PWD123456
+          - docker push thordalenterprise/infrastructure-challenge-adversus:${BITBUCKET_COMMIT:-latest}
+
+          # Define the release step
+          - step: &release-step
+              name: Release to DockerHub
+              deployment: production
+              script:
+                - echo "Installing Docker..."
+                - apt-get update
+                - apt-get install -y docker.io
+
+                # Docker login and push for release
+                - docker login -u thordalenterprise -p PWD123456
+                - docker push thordalenterprise/infrastructure-challenge-adversus:${BITBUCKET_COMMIT:-latest}
+                - docker push thordalenterprise/infrastructure-challenge-adversus:${BITBUCKET_COMMIT:-latest}
+                - docker push thordalenterprise/infrastructure-challenge-adversus:${BITBUCKET_COMMIT:-latest}
+
+# Add the release step to the default pipeline
+pipelines:
+  default:
+    - step:
+        <<: *release-step
+
+
+
+
+
+_______________________
+
+
+
+
+
+image: docker:20.10
+
+pipelines:
+  default:
+    - step:
+        name: Lint Code
+        script:
+          - pip install pycodestyle
+          - pycodestyle .
+
+  branches:
+    main:
+      - step:
+          name: Build and Release
+          services:
+            - docker
+          script:
+            - export APP_COMMIT=$BITBUCKET_COMMIT
+            - export APP_BRANCH=$BITBUCKET_BRANCH
+            - echo "Building Docker image..."
+            - docker login -u thordalenterprise -p PWD123456
+            - docker build -t thordalenterprise/infrastructure-challenge-adversus:$BITBUCKET_COMMIT .
+            - echo "Pushing Docker image to DockerHub..."
+            - docker push thordalenterprise/infrastructure-challenge-adversus:$BITBUCKET_COMMIT
+            - echo "Updating latest tag on DockerHub..."
+            - docker tag thordalenterprise/infrastructure-challenge-adversus:$BITBUCKET_COMMIT thordalenterprise/infrastructure-challenge-adversus:latest
+            - docker push thordalenterprise/infrastructure-challenge-adversus:latest
+
+
+
+
+

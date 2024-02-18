@@ -1,0 +1,134 @@
+- Begynder
+touch Dockerfile
+docker build -t appName .
+docker run appName
+docker-compose up
+docker image ls
+docker login
+
+- DockerHub
+docker pull xxxx
+
+- Docker build
+docker build -t thordalenterprise/hello-world .
+docker tag thordalenterprise/hello-world:latest thordalenterprise/hello-world:latest
+docker rmi thordalenterprise/hello-world
+docker build -t test12 . 
+docker tag hello-world:latest your-dockerhub-username/your-repository-name:tag
+docker login
+
+1. Go to DockerHub and create new repo
+2. docker pull thordalenterprise/test:v1.0
+3. docker login
+4. docker tag thordalenterprise/test:latest thordalenterprise/test:v1.0
+5. docker tag thordalenterprise/test:v1.0 thordalenterprise/test:v2.0
+6. docker build -t thordalenterprise/test:v2.0 .
+7. docker run thordalenterprise/test:v2.0
+8. docker push thordalenterprise/test:v2.0
+
+- Pull request 
+1. docker pull thordalenterprise/test:v2.0
+2. docker login
+3. docker run thordalenterprise/test:v2.0
+4. docker build -t thordalenterprise/test:v3.0 .
+5. docker push thordalenterprise/test:v3.0
+
+- Start ubuntu
+1. Docker run -it ubuntu
+2. apt update
+3. apt install nano
+4. exit
+
+- Linux commands
+1. pwd 
+2. ls
+3. cd ~
+4. mkdir docker
+5. touch file.txt
+6. nano file.txt
+7. emacs file.txt
+
+docker images  rm $(docker images  ls -q)
+docker container  rm $(docker container  ls -q)
+Docker network ls 
+Docker rmi $(network -id 887f63690ec1)
+
+--- Learning Docker ---
+
+- Docker vs virtual machine
++ mindre bytes
++ mindre isolation 
++ container er lettere at dele på tværs
+
+- Images vs container
++ et image er en package/template (like vm-template)
+
+- Docker commands
++ docker run docker/whalesay cowsay Hello 
++ docker ps
++ docker container ls
++ docker rmi -f thordalenterprise/test:v2.0
++ docker run nginx
++ docker ps -a
++ ip = docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' d20e90ebddc6
++ docker inspect <ID>
+
+- How to run a website 
+-- HTM
++ touch dockerfile 
+FROM nginx:latest
+COPY index.html /usr/share/nginx/html/
+EXPOSE 80
++ touch index.html 
+<!DOCTYPE html>
++ docker build -t simple-html-page .
++ docker run -p 8080:80 simple-html-page
++ go to http://localhost:8080
+-- python
+FROM python:3.8-slim
+WORKDIR /app
+COPY app.py .
+RUN pip install Flask
+EXPOSE 8080
+CMD ["python", "app.py"]
++ docker build -t simple-flask-app .
++ docker run -p 8080:8080 simple-flask-app
+
+- Network
++ docker network create <navn>
++ docker network rm <ID>
++ docker inspect <id>
++ docker volume create test_volume
+
+
+
+
+
+___ Docker opgave ___
+
+root: infrastructure-challenge
+- bitbucket-pipelines.yml
+- docker-compose.yml
+- Dockerfile
+- requirements.txt 
+- src 
+-- main.py
+
+
+docker rmi -f $(docker images -q)
+
+How to push 
+
+1. docker compose up 
+2. docker build -t v2 .
+2. docker tag v1:latest thordalenterprise/infrastructure-challenge:latest
+3. docker push thordalenterprise/infrastructure-challenge:latest
+4. docker pull thordalenterprise/infrastructure-challenge:latest
+
+docker build -t thordalenterprise/infrastructure-challenge-adversus:version3 .
+docker push thordalenterprise/infrastructure-challenge-adversus:latest
+
+docker build -t thordalenterprise/infrastructure-challenge-adversus:latest .
+docker push thordalenterprise/infrastructure-challenge-adversus:latest
+docker run -p 8080:8000 thordalenterprise/infrastructure-challenge-adversus:latest
+docker run -p 8080:8000 --env APP_BRANCH=your_branch --env APP_COMMIT=your_commit thordalenterprise/infrastructure-challenge-adversus:latest

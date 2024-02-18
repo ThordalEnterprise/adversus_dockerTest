@@ -1,0 +1,28 @@
+#bitbucket-pipelines.yml
+image: python:3.8
+
+pipelines:
+  default:
+    - step:
+        name: Lint Code
+        script:
+          - pip install pycodestyle
+          - pycodestyle .
+
+  branches:
+    main:
+      - step:
+          name: Build and Release
+          services:
+            - docker
+          script:
+            - export APP_COMMIT=${BITBUCKET_COMMIT}
+            - export APP_BRANCH=${BITBUCKET_BRANCH}
+            - echo "Building Docker image..."
+            - docker login -u thordalenterprise -p PWD123456
+            - docker build -t thordalenterprise/infrastructure-challenge-adversus:${BITBUCKET_COMMIT} .
+            - echo "Pushing Docker image to DockerHub..."
+            - docker push thordalenterprise/infrastructure-challenge-adversus:${BITBUCKET_COMMIT}
+            - echo "Updating latest tag on DockerHub..."
+            - docker tag thordalenterprise/infrastructure-challenge-adversus:${BITBUCKET_COMMIT} thordalenterprise/infrastructure-challenge-adversus:latest
+            - docker push thordalenterprise/infrastructure-challenge-adversus:latest
